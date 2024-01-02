@@ -13,7 +13,7 @@
   - `sync` package provides locks and synchronization premitives
   - All of the types in the sync package should be passed by pointer to functions
 
-### sync.WaitGroup
+### `sync.WaitGroup`
   - Used to wait for goroutines to finish
   - Under the hood, it uses a very simple counter and an inner lock
   - The zero value of the `WaitGroup` is ready to be used
@@ -35,7 +35,7 @@
   - Add `-race` flag to any go command to use it
     - E.g. `go run -race main.go`
 
-### sync.Map
+### `sync.Map`
   - Safe for concurrent use by multiple goroutines
   - Equivalent to a safe `map[interface{}]interface{}`
   - The zero value is empty and ready for use
@@ -49,7 +49,7 @@
   - `func (m *Map) Range(f func(key, value interface{}) bool)`
     - Takes a function and calls it sequentially for all the values in the map
 
-### sync.Mutex
+### `sync.Mutex`
   - Brings order using locks
   - The mutex is initialized **unlocked** using `var m sync.Mutex`
   - Used around critical section to execute it atomically
@@ -59,7 +59,33 @@
     - Locks the mutex and will block until mutex is in unlock state
   - `func (m *Mutex) Unlock()`
     - Unlocks the mutex and allows it to be used by another goroutine
- 
+
+### `sync.singleflight` Package
+  - Provides a duplicate function call suppression mechanism
+  - Don't repeat yourself - at the same time
+  - Using `singleflight.Group`, we can reduce duplicate processes. Say for example, multiple web requests generating same responses. Details from the request will be used to create `key` for the function. For multiple requests with same `key`, we can avoid creating new process which will be returning same response
+  - [Medium article](https://levelup.gitconnected.com/optimize-your-go-code-using-singleflight-3f11a808324)
+    ```
+    var sfGroup singleflight.Group
+    _, err, _ := sfGroup.Do(key, func() (interface{}, error) {
+      // Implementation
+    })
+    ```
+**Methods**
+  - `func (g *Group) Do(key string, fn func() (interface{}, error)) (v interface{}, err error, shared bool)`
+    - Do executes and returns the results of the given function, making sure that only one execution is in-flight for a given key at a time
+  - `func (g *Group) DoChan(key string, fn func() (interface{}, error)) <-chan Result`
+    - DoChan is like Do but returns a channel that will receive the results when they are ready
+      ```
+      type Result struct {
+        Val    interface{}
+        Err    error
+        Shared bool
+      }
+      ```
+  - `func (g *Group) Forget(key string)`
+    - Forget tells the singleflight to forget about a key. Future calls to Do for this key will call the function rather than waiting for an earlier call to complete
+
 ## Channels
   - One way to share results between goroutines is to create variables in main memory
   - Channels allow goroutines to communicate among themselves and share results when they are ready
