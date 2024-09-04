@@ -98,7 +98,7 @@
   - The zero value of channels `var ch chan T` is nil
   - Syntax to declare a channel of type T is `ch := make(chan T)`
   - Sending is done with `ch <- data`; the arrow points into the channel as the data travels into it
-  - Receiving is done with `data := <-data` ; the arrow points away from the channel as the data travels out of it
+  - Receiving is done with `data := <-ch` ; the arrow points away from the channel as the data travels out of it
   - Both send and receive ops are blocking
 
 ### Unbuffered Channels
